@@ -1,0 +1,46 @@
+version: '3.3'
+
+services:
+   db:
+     image: mysql:5.7.26
+     ports:
+       - "13306:3306"
+     volumes:
+       - $HOME/db_data:/var/lib/mysql
+       - $HOME/conf_mysql:/etc/my.cnf
+     restart: unless-stopped
+     environment:
+       MYSQL_ROOT_PASSWORD: somedrupal
+       MYSQL_DATABASE: drupal
+       MYSQL_USER: drupal
+       MYSQL_PASSWORD: drupal
+
+   drupal:
+     depends_on:
+       - db
+     image: drupal:latest
+     ports:
+       - "5000:80"
+     volumes:
+      - $HOME/drupal_modules:/var/www/html/modules
+      - $HOME/drupal_profiles:/var/www/html/profiles
+      - $HOME/drupal_themes:/var/www/html/themes
+      - $HOME/drupal_sites:/var/www/html/sites
+     restart: unless-stopped
+     environment:
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: drupal
+       WORDPRESS_DB_PASSWORD: drupal
+       WORDPRESS_DB_NAME: drupal
+   
+   phpmyadmin:
+     depends_on:
+       - db
+     image: phpmyadmin/phpmyadmin
+     ports:
+       - "8181:80"
+     restart: unless-stopped
+     environment:
+       MYSQL_USERNAME: root
+       MYSQL_ROOT_PASSWORD: somedrupal
+       PMA_HOST: db
